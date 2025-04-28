@@ -48,7 +48,7 @@ public class LatheMachineManager : MonoBehaviour
         var client = new MongoClient(mongoURI);
         var database = client.GetDatabase("Lathe" + latheId);
 
-        jobCollection = database.GetCollection<BsonDocument>("Job_Details");
+        jobCollection = database.GetCollection<BsonDocument>("JobDetails");
         sensoryCollection = database.GetCollection<BsonDocument>("SensoryData");
     }
 

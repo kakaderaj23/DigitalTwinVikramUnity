@@ -3,6 +3,7 @@ using MongoDB.Bson;
 using MongoDB.Driver;
 using TMPro;
 using System.Collections;
+using System.IO;
 
 public class LatheMachineManager : MonoBehaviour
 {
@@ -22,6 +23,12 @@ public class LatheMachineManager : MonoBehaviour
     public GameObject closeJobDetailsButton;
     public GameObject showSensoryDataButton;
     public GameObject closeSensoryDataButton;
+    public GameObject openDetailsButtonOuter;
+    public GameObject closeJobDetailsButtonOuter;
+    public GameObject showSensoryDataButtonOuter;
+
+    [Header("Slider")]
+    public UnityEngine.UI.Slider remainingTimeSlider;  // KEEP IT but unused now
 
     // MongoDB references
     private IMongoCollection<BsonDocument> jobCollection;
@@ -29,18 +36,23 @@ public class LatheMachineManager : MonoBehaviour
 
     void Start()
     {
-        // Initial setup: Connect to MongoDB
         ConnectMongoDB();
-        Debug.Log("Connected to MongoDB");
-        // Button listeners
+
         openDetailsButton.GetComponent<UnityEngine.UI.Button>().onClick.AddListener(OpenJobDetails);
         closeJobDetailsButton.GetComponent<UnityEngine.UI.Button>().onClick.AddListener(CloseJobDetails);
         showSensoryDataButton.GetComponent<UnityEngine.UI.Button>().onClick.AddListener(OpenSensoryData);
-        closeSensoryDataButton.GetComponent<UnityEngine.UI.Button>().onClick.AddListener(CloseSensoryData);
+
         Debug.Log("Button listeners set up");
-        // Initially hide windows
+
         jobDetailsWindow.SetActive(false);
         sensoryDataWindow.SetActive(false);
+
+        openDetailsButtonOuter.SetActive(true);
+        closeJobDetailsButtonOuter.SetActive(false);
+        showSensoryDataButtonOuter.SetActive(false);
+
+        if (remainingTimeSlider != null)
+            remainingTimeSlider.gameObject.SetActive(false);  // Keep it hidden always
     }
 
     void ConnectMongoDB()
@@ -55,7 +67,15 @@ public class LatheMachineManager : MonoBehaviour
     void OpenJobDetails()
     {
         jobDetailsWindow.SetActive(true);
+        sensoryDataWindow.SetActive(false);
+
         latheIdText.text = "Lathe ID : Lathe" + latheId;
+
+        openDetailsButtonOuter.SetActive(false);
+        closeJobDetailsButtonOuter.SetActive(true);
+        showSensoryDataButtonOuter.SetActive(true);
+
+        StopCoroutine(UpdateJobDetailsRoutine());
         StartCoroutine(UpdateJobDetailsRoutine());
     }
 
@@ -63,6 +83,11 @@ public class LatheMachineManager : MonoBehaviour
     {
         jobDetailsWindow.SetActive(false);
         sensoryDataWindow.SetActive(false);
+
+        openDetailsButtonOuter.SetActive(true);
+        closeJobDetailsButtonOuter.SetActive(false);
+        showSensoryDataButtonOuter.SetActive(false);
+
         StopAllCoroutines();
     }
 
@@ -98,7 +123,10 @@ public class LatheMachineManager : MonoBehaviour
 
     async void FetchAndDisplayJobDetails()
     {
-        var document = await jobCollection.Find(new BsonDocument()).Sort(Builders<BsonDocument>.Sort.Descending("_id")).FirstOrDefaultAsync();
+        var filter = Builders<BsonDocument>.Filter.Eq("Status", "Started");
+        var sort = Builders<BsonDocument>.Sort.Descending("JobID");
+
+        var document = await jobCollection.Find(filter).Sort(sort).FirstOrDefaultAsync();
 
         if (document != null)
         {
@@ -112,13 +140,41 @@ public class LatheMachineManager : MonoBehaviour
                 $"Estimated Time : {document.GetValue("EstimatedTime", "N/A")} min\n" +
                 $"Operator Name : {document.GetValue("OperatorName", "N/A")}\n" +
                 $"Status : {document.GetValue("Status", "N/A")}";
+
+            // Commented out progress bar update
+            // UpdateProgressBar(document);
         }
         else
         {
-            jobDetailsText.text = "No job details found.";
+            jobDetailsText.text = "No job is currently running.";
+            // ResetProgressBar();
+            showSensoryDataButtonOuter.SetActive(false);
+
+            // Hide slider (even though it is already hidden)
+            if (remainingTimeSlider != null)
+                remainingTimeSlider.gameObject.SetActive(false);
         }
     }
 
+    /*
+    void UpdateProgressBar(BsonDocument jobDocument)
+    {
+        if (jobDocument.Contains("EstimatedTime") && jobDocument.Contains("StartTime"))
+        {
+            double estimatedTime = jobDocument.GetValue("EstimatedTime").ToDouble();
+            var startTime = jobDocument.GetValue("StartTime").ToUniversalTime();
+            double elapsedMinutes = (System.DateTime.UtcNow - startTime).TotalMinutes;
+
+            double progress = Mathf.Clamp01((float)(elapsedMinutes / estimatedTime));
+            remainingTimeSlider.value = (float)(1 - progress);
+        }
+    }
+
+    void ResetProgressBar()
+    {
+        remainingTimeSlider.value = 0f;
+    }
+    */
 
     async void FetchAndDisplaySensoryData()
     {
@@ -130,7 +186,7 @@ public class LatheMachineManager : MonoBehaviour
                 $"Temperature : {document.GetValue("Temperature", "N/A")} °C\n" +
                 $"Vibration : {document.GetValue("Vibration", "N/A")} mm/s\n" +
                 $"RPM : {document.GetValue("RPM", "N/A")}\n" +
-                $"Power Consumption : {document.GetValue("Power_Consumption", "N/A")} kW";
+                $"Power Consumption : {document.GetValue("Power", "N/A")} kW";
         }
         else
         {

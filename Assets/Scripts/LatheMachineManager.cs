@@ -186,7 +186,8 @@ public class LatheMachineManager : MonoBehaviour
                 $"Temperature : {document.GetValue("Temperature", "N/A")} °C\n" +
                 $"Vibration : {document.GetValue("Vibration", "N/A")} mm/s\n" +
                 $"RPM : {document.GetValue("RPM", "N/A")}\n" +
-                $"Power Consumption : {document.GetValue("Power", "N/A")} kW";
+                $"Power Consumption : {document.GetValue("Power", "N/A")} kW"+
+                $"Tool Wear : {document.GetValue("ToolWear", "N/A")} %";
         }
         else
         {

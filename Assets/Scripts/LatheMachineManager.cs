@@ -15,6 +15,7 @@ public class LatheMachineManager : MonoBehaviour
     public GameObject jobDetailsWindow;
     public TextMeshProUGUI latheIdText;
     public TextMeshProUGUI jobDetailsText;
+    public TextMeshProUGUI LatheLabelText;
     public GameObject sensoryDataWindow;
     public TextMeshProUGUI sensoryDataText;
 
@@ -41,7 +42,7 @@ public class LatheMachineManager : MonoBehaviour
         openDetailsButton.GetComponent<UnityEngine.UI.Button>().onClick.AddListener(OpenJobDetails);
         closeJobDetailsButton.GetComponent<UnityEngine.UI.Button>().onClick.AddListener(CloseJobDetails);
         showSensoryDataButton.GetComponent<UnityEngine.UI.Button>().onClick.AddListener(OpenSensoryData);
-
+        LatheLabelText.SetText("Lathe " + latheId);
         Debug.Log("Button listeners set up");
 
         jobDetailsWindow.SetActive(false);
@@ -69,7 +70,7 @@ public class LatheMachineManager : MonoBehaviour
         jobDetailsWindow.SetActive(true);
         sensoryDataWindow.SetActive(false);
 
-        latheIdText.text = "Lathe ID : Lathe" + latheId;
+        latheIdText.text = "Lathe ID : Lathe " + latheId;
 
         openDetailsButtonOuter.SetActive(false);
         closeJobDetailsButtonOuter.SetActive(true);

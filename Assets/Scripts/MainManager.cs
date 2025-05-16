@@ -8,7 +8,9 @@ public class MainManager : MonoBehaviour
     public Button proceedButton;
     public GameObject pauseCanvas;
     public Button exitButton;
-    public GameObject gameplayRoot;
+
+    [Header("Player Reference")]
+    public GameObject playerGameObject;
 
     private bool isPaused = false;
 
@@ -17,15 +19,18 @@ public class MainManager : MonoBehaviour
         // Show welcome screen
         welcomeCanvas.SetActive(true);
         proceedButton.onClick.AddListener(OnProceedClicked);
-        // Hide game & pause UI initially
-        gameplayRoot.SetActive(false);
+
+        // Hide pause UI initially
         pauseCanvas.SetActive(false);
+        isPaused = false;
+
+        exitButton.onClick.AddListener(OnExitClicked);
     }
 
     void Update()
     {
         // Toggle pause menu with ESC
-        if (gameplayRoot.activeSelf && Input.GetKeyDown(KeyCode.Escape))
+        if (Input.GetKeyDown(KeyCode.Escape))
         {
             isPaused = !isPaused;
             pauseCanvas.SetActive(isPaused);
@@ -36,13 +41,27 @@ public class MainManager : MonoBehaviour
     public void OnProceedClicked()
     {
         welcomeCanvas.SetActive(false);
-        gameplayRoot.SetActive(true); // Start the actual game
+
+        // Set gameStarted = true on the player's Walking Script
+        var walkingScript = playerGameObject.GetComponent<WalkingScript>();
+        if (walkingScript != null)
+        {
+            walkingScript.gameStarted = true;
+        }
+        else
+        {
+            Debug.LogWarning("WalkingScript not found on playerGameObject.");
+        }
     }
 
     // Called when "Exit" button is clicked
     public void OnExitClicked()
     {
         Debug.Log("Exiting game...");
+#if UNITY_EDITOR
+        UnityEditor.EditorApplication.isPlaying = false;
+#else
         Application.Quit();
+#endif
     }
 }

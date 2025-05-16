@@ -10,6 +10,7 @@ public class WalkingScript : MonoBehaviour
     private CharacterController controller;
     private float verticalVelocity;
     private float xRotation = 0f;
+    public bool gameStarted = false;  // Flag to check if the game has started
 
     [Header("References")]
     public Transform playerCamera;  // Assign your Main Camera here manually!
@@ -29,7 +30,10 @@ public class WalkingScript : MonoBehaviour
 
     void Update()
     {
-        HandleMovement();
+        if (gameStarted)
+        {
+            HandleMovement();
+        }
         HandleMouseLook();
     }
 

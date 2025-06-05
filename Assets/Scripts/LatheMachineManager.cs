@@ -8,7 +8,7 @@ using System.IO;
 public class LatheMachineManager : MonoBehaviour
 {
     [Header("MongoDB Settings")]
-    public string mongoURI = "mongodb://localhost:27017"; // replace with your MongoDB URI
+    public string mongoURI = "mongodb+srv://kakaderaj23:uZ99p79aNhMH1wwL@cluster0.o7rka2j.mongodb.net/"; // replace with your MongoDB URI
     public string latheId = "1"; // e.g., user sets this in the Inspector (1 or 2)
 
     [Header("UI Elements")]
@@ -34,11 +34,14 @@ public class LatheMachineManager : MonoBehaviour
     // MongoDB references
     private IMongoCollection<BsonDocument> jobCollection;
     private IMongoCollection<BsonDocument> sensoryCollection;
+    public GameObject workerGameObject; // Reference to the worker GameObject
+    public GameObject latheAnimationObject; // Reference to the lathe animation object
 
     void Start()
     {
         ConnectMongoDB();
-
+        workerGameObject.SetActive(false); // Hide worker GameObject initially
+        latheAnimationObject.SetActive(false); // Hide lathe animation object initially
         openDetailsButton.GetComponent<UnityEngine.UI.Button>().onClick.AddListener(OpenJobDetails);
         closeJobDetailsButton.GetComponent<UnityEngine.UI.Button>().onClick.AddListener(CloseJobDetails);
         showSensoryDataButton.GetComponent<UnityEngine.UI.Button>().onClick.AddListener(OpenSensoryData);
@@ -54,6 +57,8 @@ public class LatheMachineManager : MonoBehaviour
 
         if (remainingTimeSlider != null)
             remainingTimeSlider.gameObject.SetActive(false);  // Keep it hidden always
+        StartCoroutine(MonitorMachineStatusRoutine());
+
     }
 
     void ConnectMongoDB()
@@ -187,7 +192,7 @@ public class LatheMachineManager : MonoBehaviour
                 $"Temperature : {document.GetValue("Temperature", "N/A")} °C\n" +
                 $"Vibration : {document.GetValue("Vibration", "N/A")} mm/s\n" +
                 $"RPM : {document.GetValue("RPM", "N/A")}\n" +
-                $"Power Consumption : {document.GetValue("Power", "N/A")} kW"+
+                $"Power Consumption : {document.GetValue("Power", "N/A")} kW" +
                 $"Tool Wear : {document.GetValue("ToolWear", "N/A")} %";
         }
         else
@@ -199,5 +204,25 @@ public class LatheMachineManager : MonoBehaviour
     void Update()
     {
         // Reserved for future updates or interactivity
+
     }
+    IEnumerator MonitorMachineStatusRoutine()
+    {
+        while (true)
+        {
+            CheckMachineStatus();
+            yield return new WaitForSeconds(3f);
+        }
+    }
+    async void CheckMachineStatus()
+    {
+        var filter = Builders<BsonDocument>.Filter.Eq("Status", "Started");
+        var document = await jobCollection.Find(filter).FirstOrDefaultAsync();
+
+        bool isMachineWorking = document != null;
+
+        workerGameObject.SetActive(isMachineWorking);
+        latheAnimationObject.SetActive(isMachineWorking);
+    }
+
 }

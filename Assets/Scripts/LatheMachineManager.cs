@@ -64,10 +64,22 @@ public class LatheMachineManager : MonoBehaviour
     void ConnectMongoDB()
     {
         var client = new MongoClient(mongoURI);
+
+        //Old System
         var database = client.GetDatabase("Lathe" + latheId);
 
         jobCollection = database.GetCollection<BsonDocument>("JobDetails");
         sensoryCollection = database.GetCollection<BsonDocument>("SensoryData");
+
+        // // New System
+        // var alertsDatabase = client.GetDatabase("Alerts");
+        // var jobsDatabase = client.GetDatabase("Jobs");
+        // var sensoryDatabase = client.GetDatabase("SensorData");
+
+        // jobCollection = jobsDatabase.GetCollection<BsonDocument>("lathe" + latheId + "_job_detail");
+        // sensoryCollection = sensoryDatabase.GetCollection<BsonDocument>("lathe" + latheId + "_sensory_data");
+        // alertsDatabase.GetCollection<BsonDocument>("lathe" + latheId + "_alerts");
+    
     }
 
     void OpenJobDetails()

@@ -7,7 +7,7 @@ using System.Collections;
 public class LatheMachineManager : MonoBehaviour
 {
     [Header("MongoDB Settings")]
-    public string mongoURI = "mongodb+srv://kakaderaj23:uZ99p79aNhMH1wwL@cluster0.o7rka2j.mongodb.net/";
+    public string mongoURI = "mongodb://localhost:27017/";
     [Tooltip("e.g., LATHE-05, LATHE-08")]
     public string machineId = "LATHE-05";
 

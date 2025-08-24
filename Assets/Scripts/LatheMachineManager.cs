@@ -3,19 +3,19 @@ using MongoDB.Bson;
 using MongoDB.Driver;
 using TMPro;
 using System.Collections;
-using System.IO;
 
 public class LatheMachineManager : MonoBehaviour
 {
     [Header("MongoDB Settings")]
-    public string mongoURI = "mongodb+srv://kakaderaj23:uZ99p79aNhMH1wwL@cluster0.o7rka2j.mongodb.net/"; // replace with your MongoDB URI
-    public string latheId = "1"; // e.g., user sets this in the Inspector (1 or 2)
+    public string mongoURI = "mongodb+srv://kakaderaj23:uZ99p79aNhMH1wwL@cluster0.o7rka2j.mongodb.net/";
+    [Tooltip("e.g., LATHE-05, LATHE-08")]
+    public string machineId = "LATHE-05";
 
     [Header("UI Elements")]
     public GameObject jobDetailsWindow;
-    public TextMeshProUGUI latheIdText;
+    public TextMeshProUGUI latheIdText;           // Label above job panel (now shows Machine ID)
     public TextMeshProUGUI jobDetailsText;
-    public TextMeshProUGUI LatheLabelText;
+    public TextMeshProUGUI LatheLabelText;        // Big label on kiosk/card
     public GameObject sensoryDataWindow;
     public TextMeshProUGUI sensoryDataText;
 
@@ -29,57 +29,77 @@ public class LatheMachineManager : MonoBehaviour
     public GameObject showSensoryDataButtonOuter;
 
     [Header("Slider")]
-    public UnityEngine.UI.Slider remainingTimeSlider;  // KEEP IT but unused now
+    public UnityEngine.UI.Slider remainingTimeSlider; // kept but unused
 
-    // MongoDB references
+    [Header("Scene Objects")]
+    public GameObject workerGameObject;      // worker visual
+    public GameObject latheAnimationObject;  // machine animation
+
+    // MongoDB
     private IMongoCollection<BsonDocument> jobCollection;
     private IMongoCollection<BsonDocument> sensoryCollection;
-    public GameObject workerGameObject; // Reference to the worker GameObject
-    public GameObject latheAnimationObject; // Reference to the lathe animation object
+
+    // Toggle this to move to centralized DB naming if/when you switch
+    [Header("DB Layout")]
+    public bool useNewDbLayout = false; // false => old per-lathe DB; true => central DBs
+
+    // Treat these as “active” statuses. Add more if your pipeline uses others.
+    private static readonly string[] ActiveStatuses = { "running", "started" };
 
     void Start()
     {
         ConnectMongoDB();
-        workerGameObject.SetActive(false); // Hide worker GameObject initially
-        latheAnimationObject.SetActive(false); // Hide lathe animation object initially
+
+        if (workerGameObject) workerGameObject.SetActive(false);
+        if (latheAnimationObject) latheAnimationObject.SetActive(false);
+
+        // Wire up buttons
         openDetailsButton.GetComponent<UnityEngine.UI.Button>().onClick.AddListener(OpenJobDetails);
         closeJobDetailsButton.GetComponent<UnityEngine.UI.Button>().onClick.AddListener(CloseJobDetails);
         showSensoryDataButton.GetComponent<UnityEngine.UI.Button>().onClick.AddListener(OpenSensoryData);
-        LatheLabelText.SetText("Lathe " + latheId);
-        Debug.Log("Button listeners set up");
+        closeSensoryDataButton.GetComponent<UnityEngine.UI.Button>().onClick.AddListener(CloseSensoryData);
 
+        // Labels
+        if (LatheLabelText) LatheLabelText.SetText($"Lathe {machineId}");
+        if (latheIdText) latheIdText.text = $"Machine ID : {machineId}";
+
+        // Panels
         jobDetailsWindow.SetActive(false);
         sensoryDataWindow.SetActive(false);
 
+        // Outer buttons state
         openDetailsButtonOuter.SetActive(true);
         closeJobDetailsButtonOuter.SetActive(false);
         showSensoryDataButtonOuter.SetActive(false);
 
-        if (remainingTimeSlider != null)
-            remainingTimeSlider.gameObject.SetActive(false);  // Keep it hidden always
-        StartCoroutine(MonitorMachineStatusRoutine());
+        if (remainingTimeSlider != null) remainingTimeSlider.gameObject.SetActive(false);
 
+        StartCoroutine(MonitorMachineStatusRoutine());
     }
 
     void ConnectMongoDB()
     {
         var client = new MongoClient(mongoURI);
 
-        //Old System
-        var database = client.GetDatabase("Lathe" + latheId);
+        if (!useNewDbLayout)
+        {
+            // Old layout: DB per-lathe, collections named JobDetails and SensoryData
+            var database = client.GetDatabase("Lathe" + machineId); // if you used numeric earlier, consider changing to machineId
+            jobCollection = database.GetCollection<BsonDocument>("JobDetails");
+            sensoryCollection = database.GetCollection<BsonDocument>("SensoryData");
+        }
+        else
+        {
+            // Centralized layout (recommended going forward)
+            var alertsDatabase  = client.GetDatabase("Alerts");
+            var jobsDatabase    = client.GetDatabase("Jobs");
+            var sensoryDatabase = client.GetDatabase("SensorData");
 
-        jobCollection = database.GetCollection<BsonDocument>("JobDetails");
-        sensoryCollection = database.GetCollection<BsonDocument>("SensoryData");
-
-        // // New System
-        // var alertsDatabase = client.GetDatabase("Alerts");
-        // var jobsDatabase = client.GetDatabase("Jobs");
-        // var sensoryDatabase = client.GetDatabase("SensorData");
-
-        // jobCollection = jobsDatabase.GetCollection<BsonDocument>("lathe" + latheId + "_job_detail");
-        // sensoryCollection = sensoryDatabase.GetCollection<BsonDocument>("lathe" + latheId + "_sensory_data");
-        // alertsDatabase.GetCollection<BsonDocument>("lathe" + latheId + "_alerts");
-    
+            // Example naming; adjust if your actual collection names differ
+            jobCollection     = jobsDatabase.GetCollection<BsonDocument>("lathe_jobs");
+            sensoryCollection = sensoryDatabase.GetCollection<BsonDocument>("lathe_sensory_data");
+            // var alerts = alertsDatabase.GetCollection<BsonDocument>("lathe_alerts");
+        }
     }
 
     void OpenJobDetails()
@@ -87,14 +107,15 @@ public class LatheMachineManager : MonoBehaviour
         jobDetailsWindow.SetActive(true);
         sensoryDataWindow.SetActive(false);
 
-        latheIdText.text = "Lathe ID : Lathe " + latheId;
+        if (latheIdText) latheIdText.text = $"Machine ID : {machineId}";
 
         openDetailsButtonOuter.SetActive(false);
         closeJobDetailsButtonOuter.SetActive(true);
         showSensoryDataButtonOuter.SetActive(true);
 
-        StopCoroutine(UpdateJobDetailsRoutine());
+        StopAllCoroutines();
         StartCoroutine(UpdateJobDetailsRoutine());
+        StartCoroutine(MonitorMachineStatusRoutine()); // keep status monitoring on
     }
 
     void CloseJobDetails()
@@ -107,25 +128,27 @@ public class LatheMachineManager : MonoBehaviour
         showSensoryDataButtonOuter.SetActive(false);
 
         StopAllCoroutines();
+        StartCoroutine(MonitorMachineStatusRoutine()); // keep status monitoring even when closed
     }
 
     void OpenSensoryData()
     {
         sensoryDataWindow.SetActive(true);
+        StopCoroutineSafe(UpdateSensoryDataRoutine());
         StartCoroutine(UpdateSensoryDataRoutine());
     }
 
     void CloseSensoryData()
     {
         sensoryDataWindow.SetActive(false);
-        StopCoroutine(UpdateSensoryDataRoutine());
+        StopCoroutineSafe(UpdateSensoryDataRoutine());
     }
 
     IEnumerator UpdateJobDetailsRoutine()
     {
         while (true)
         {
-            FetchAndDisplayJobDetails();
+            yield return FetchAndDisplayJobDetails();
             yield return new WaitForSeconds(5f);
         }
     }
@@ -134,107 +157,192 @@ public class LatheMachineManager : MonoBehaviour
     {
         while (true)
         {
-            FetchAndDisplaySensoryData();
+            yield return FetchAndDisplaySensoryData();
             yield return new WaitForSeconds(5f);
         }
     }
 
-    async void FetchAndDisplayJobDetails()
-    {
-        var filter = Builders<BsonDocument>.Filter.Eq("Status", "Started");
-        var sort = Builders<BsonDocument>.Sort.Descending("JobID");
-
-        var document = await jobCollection.Find(filter).Sort(sort).FirstOrDefaultAsync();
-
-        if (document != null)
-        {
-            jobDetailsText.text =
-                $"Job ID : {document.GetValue("JobID", "N/A")}\n" +
-                $"Job Type : {document.GetValue("JobType", "N/A")}\n" +
-                $"Job Description : {document.GetValue("JobDescription", "N/A")}\n" +
-                $"Material : {document.GetValue("Material", "N/A")}\n" +
-                $"Tool No. : {document.GetValue("ToolNo", "N/A")}\n" +
-                $"Start Time : {document.GetValue("StartTime", "N/A")}\n" +
-                $"Estimated Time : {document.GetValue("EstimatedTime", "N/A")} min\n" +
-                $"Operator Name : {document.GetValue("OperatorName", "N/A")}\n" +
-                $"Status : {document.GetValue("Status", "N/A")}";
-
-            // Commented out progress bar update
-            // UpdateProgressBar(document);
-        }
-        else
-        {
-            jobDetailsText.text = "No job is currently running.";
-            // ResetProgressBar();
-            showSensoryDataButtonOuter.SetActive(false);
-
-            // Hide slider (even though it is already hidden)
-            if (remainingTimeSlider != null)
-                remainingTimeSlider.gameObject.SetActive(false);
-        }
-    }
-
-    /*
-    void UpdateProgressBar(BsonDocument jobDocument)
-    {
-        if (jobDocument.Contains("EstimatedTime") && jobDocument.Contains("StartTime"))
-        {
-            double estimatedTime = jobDocument.GetValue("EstimatedTime").ToDouble();
-            var startTime = jobDocument.GetValue("StartTime").ToUniversalTime();
-            double elapsedMinutes = (System.DateTime.UtcNow - startTime).TotalMinutes;
-
-            double progress = Mathf.Clamp01((float)(elapsedMinutes / estimatedTime));
-            remainingTimeSlider.value = (float)(1 - progress);
-        }
-    }
-
-    void ResetProgressBar()
-    {
-        remainingTimeSlider.value = 0f;
-    }
-    */
-
-    async void FetchAndDisplaySensoryData()
-    {
-        var document = await sensoryCollection.Find(new BsonDocument()).Sort(Builders<BsonDocument>.Sort.Descending("_id")).FirstOrDefaultAsync();
-
-        if (document != null)
-        {
-            sensoryDataText.text =
-                $"Temperature : {document.GetValue("Temperature", "N/A")} °C\n" +
-                $"Vibration : {document.GetValue("Vibration", "N/A")} mm/s\n" +
-                $"RPM : {document.GetValue("RPM", "N/A")}\n" +
-                $"Power Consumption : {document.GetValue("Power", "N/A")} kW" +
-                $"Tool Wear : {document.GetValue("ToolWear", "N/A")} %";
-        }
-        else
-        {
-            sensoryDataText.text = "No sensory data found.";
-        }
-    }
-
-    void Update()
-    {
-        // Reserved for future updates or interactivity
-
-    }
     IEnumerator MonitorMachineStatusRoutine()
     {
         while (true)
         {
-            CheckMachineStatus();
+            yield return CheckMachineStatus();
             yield return new WaitForSeconds(3f);
         }
     }
-    async void CheckMachineStatus()
+
+    // --- JOBS ---
+
+    IEnumerator FetchAndDisplayJobDetails()
     {
-        var filter = Builders<BsonDocument>.Filter.Eq("Status", "Started");
-        var document = await jobCollection.Find(filter).FirstOrDefaultAsync();
+        // Try to get the most recent ACTIVE job first
+        var activeFilter =
+            Builders<BsonDocument>.Filter.Eq("machineId", machineId) &
+            Builders<BsonDocument>.Filter.In("status", ActiveStatuses);
 
-        bool isMachineWorking = document != null;
+        var latestActive = jobCollection
+            .Find(activeFilter)
+            .Sort(Builders<BsonDocument>.Sort.Descending("startTime"))
+            .Limit(1)
+            .FirstOrDefault();
 
-        workerGameObject.SetActive(isMachineWorking);
-        latheAnimationObject.SetActive(isMachineWorking);
+        BsonDocument docToShow = latestActive;
+
+        // If none active, fall back to most recent job (any status) for this machine
+        if (docToShow == null)
+        {
+            var anyFilter = Builders<BsonDocument>.Filter.Eq("machineId", machineId);
+            docToShow = jobCollection
+                .Find(anyFilter)
+                .Sort(Builders<BsonDocument>.Sort.Descending("startTime"))
+                .Limit(1)
+                .FirstOrDefault();
+        }
+
+        if (docToShow != null)
+        {
+            string jobId          = SafeStr(docToShow, "jobId");
+            string jobType        = SafeStr(docToShow, "jobType");
+            string jobDescription = SafeStr(docToShow, "jobDescription");
+            string operatorId     = SafeStr(docToShow, "operatorId");
+            string status         = SafeStr(docToShow, "status");
+            string error          = SafeStr(docToShow, "error");
+
+            string startTimeStr = SafeDateStr(docToShow, "startTime");
+            string endTimeStr   = SafeDateStr(docToShow, "endTime");
+
+            string estimatedStr = SafeNumberStr(docToShow, "estimatedTime");
+            string actualStr    = SafeNumberStr(docToShow, "actualDuration");
+
+            jobDetailsText.text =
+                $"Job ID : {jobId}\n" +
+                $"Job Type : {jobType}\n" +
+                $"Job Description : {jobDescription}\n" +
+                $"Operator : {operatorId}\n" +
+                $"Start Time : {startTimeStr}\n" +
+                $"End Time : {endTimeStr}\n" +
+                $"Estimated Time : {estimatedStr} min\n" +
+                $"Actual Duration : {actualStr} min\n" +
+                $"Status : {status}" +
+                (string.IsNullOrWhiteSpace(error) ? "" : $"\nError : {error}");
+
+            // show sensory button always; or restrict only when active
+            showSensoryDataButtonOuter.SetActive(true);
+        }
+        else
+        {
+            jobDetailsText.text = "No jobs found for this machine.";
+            showSensoryDataButtonOuter.SetActive(false);
+        }
+
+        yield break;
     }
 
+    // --- SENSORS ---
+
+    IEnumerator FetchAndDisplaySensoryData()
+    {
+        var filter = Builders<BsonDocument>.Filter.Eq("machineId", machineId);
+
+        var doc = sensoryCollection
+            .Find(filter)
+            .Sort(Builders<BsonDocument>.Sort.Descending("timestamp"))
+            .Limit(1)
+            .FirstOrDefault();
+
+        if (doc != null)
+        {
+            string tsStr = SafeDateStr(doc, "timestamp");
+
+            string airTemp         = SafeNumberStr(doc, "airTemperature");
+            string procTemp        = SafeNumberStr(doc, "processTemperature");
+            string rpm             = SafeNumberStr(doc, "rotationalSpeed");
+            string torque          = SafeNumberStr(doc, "torque");
+            string toolWear        = SafeNumberStr(doc, "toolWear");
+            string failProb        = SafeNumberStr(doc, "failureProbability");
+
+            sensoryDataText.text =
+                $"Timestamp : {tsStr}\n" +
+                $"Air Temperature : {airTemp}\n" +
+                $"Process Temperature : {procTemp}\n" +
+                $"Rotational Speed : {rpm}\n" +
+                $"Torque : {torque}\n" +
+                $"Tool Wear : {toolWear}\n" +
+                $"Failure Probability : {failProb}";
+        }
+        else
+        {
+            sensoryDataText.text = "No sensory data found for this machine.";
+        }
+
+        yield break;
+    }
+
+    // --- STATUS / VISUALS ---
+
+    IEnumerator CheckMachineStatus()
+    {
+        // Machine considered “working” if there’s an active job
+        var activeFilter =
+            Builders<BsonDocument>.Filter.Eq("machineId", machineId) &
+            Builders<BsonDocument>.Filter.In("status", ActiveStatuses);
+
+        var activeDoc = jobCollection.Find(activeFilter).Limit(1).FirstOrDefault();
+        bool isWorking = activeDoc != null;
+
+        if (workerGameObject)      workerGameObject.SetActive(isWorking);
+        if (latheAnimationObject)  latheAnimationObject.SetActive(isWorking);
+
+        yield break;
+    }
+
+    // --- Helpers ---
+
+    private static string SafeStr(BsonDocument doc, string key, string fallback = "N/A")
+    {
+        if (!doc.Contains(key)) return fallback;
+        var v = doc[key];
+        return v == null || v.IsBsonNull ? fallback : v.ToString();
+    }
+
+    private static string SafeNumberStr(BsonDocument doc, string key, string fallback = "N/A")
+    {
+        if (!doc.Contains(key)) return fallback;
+        var v = doc[key];
+        if (v == null || v.IsBsonNull) return fallback;
+
+        if (v.IsInt32)  return v.AsInt32.ToString();
+        if (v.IsInt64)  return v.AsInt64.ToString();
+        if (v.IsDouble) return v.AsDouble.ToString("0.###");
+        if (v.IsDecimal128) return v.AsDecimal128.ToString();
+        if (double.TryParse(v.ToString(), out double d)) return d.ToString("0.###");
+        return v.ToString();
+    }
+
+    private static string SafeDateStr(BsonDocument doc, string key, string fallback = "—")
+    {
+        if (!doc.Contains(key)) return fallback;
+        var v = doc[key];
+        if (v == null || v.IsBsonNull) return fallback;
+
+        // Handles { "$date": ... } as BsonDateTime or ISO8601 strings
+        if (v.IsBsonDateTime) return v.ToUniversalTime().ToString("yyyy-MM-dd HH:mm:ss 'UTC'");
+        if (v.IsBsonDocument && v.AsBsonDocument.Contains("$date"))
+        {
+            var dateVal = v.AsBsonDocument["$date"];
+            if (dateVal.IsBsonDateTime) return dateVal.ToUniversalTime().ToString("yyyy-MM-dd HH:mm:ss 'UTC'");
+            if (dateVal.IsString && System.DateTime.TryParse(dateVal.AsString, out var dt))
+                return dt.ToUniversalTime().ToString("yyyy-MM-dd HH:mm:ss 'UTC'");
+        }
+        if (v.IsString && System.DateTime.TryParse(v.AsString, out var dt2))
+            return dt2.ToUniversalTime().ToString("yyyy-MM-dd HH:mm:ss 'UTC'");
+
+        return fallback;
+    }
+
+    private void StopCoroutineSafe(IEnumerator routine)
+    {
+        if (routine == null) return;
+        try { StopCoroutine(routine); } catch { /* ignore */ }
+    }
 }

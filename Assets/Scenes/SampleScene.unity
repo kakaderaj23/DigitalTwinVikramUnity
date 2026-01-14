@@ -1846,6 +1846,10 @@ PrefabInstance:
       propertyPath: latheId
       value: 4
       objectReference: {fileID: 0}
+    - target: {fileID: 6510231186008781763, guid: ba3e4eaa1e9ca35428ca08ed71ca75bb, type: 3}
+      propertyPath: machineId
+      value: LATHE-04
+      objectReference: {fileID: 0}
     - target: {fileID: 6665267510324699942, guid: ba3e4eaa1e9ca35428ca08ed71ca75bb, type: 3}
       propertyPath: m_StaticEditorFlags
       value: 0
@@ -8363,6 +8367,10 @@ PrefabInstance:
     - target: {fileID: 6510231186008781763, guid: ba3e4eaa1e9ca35428ca08ed71ca75bb, type: 3}
       propertyPath: latheId
       value: 7
+      objectReference: {fileID: 0}
+    - target: {fileID: 6510231186008781763, guid: ba3e4eaa1e9ca35428ca08ed71ca75bb, type: 3}
+      propertyPath: machineId
+      value: LATHE-07
       objectReference: {fileID: 0}
     - target: {fileID: 6665267510324699942, guid: ba3e4eaa1e9ca35428ca08ed71ca75bb, type: 3}
       propertyPath: m_StaticEditorFlags
@@ -16933,6 +16941,10 @@ PrefabInstance:
       propertyPath: latheId
       value: 12
       objectReference: {fileID: 0}
+    - target: {fileID: 6510231186008781763, guid: ba3e4eaa1e9ca35428ca08ed71ca75bb, type: 3}
+      propertyPath: machineId
+      value: LATHE-12
+      objectReference: {fileID: 0}
     - target: {fileID: 6665267510324699942, guid: ba3e4eaa1e9ca35428ca08ed71ca75bb, type: 3}
       propertyPath: m_StaticEditorFlags
       value: 0
@@ -19179,6 +19191,10 @@ PrefabInstance:
     - target: {fileID: 6510231186008781763, guid: ba3e4eaa1e9ca35428ca08ed71ca75bb, type: 3}
       propertyPath: latheId
       value: 14
+      objectReference: {fileID: 0}
+    - target: {fileID: 6510231186008781763, guid: ba3e4eaa1e9ca35428ca08ed71ca75bb, type: 3}
+      propertyPath: machineId
+      value: LATHE-14
       objectReference: {fileID: 0}
     - target: {fileID: 6665267510324699942, guid: ba3e4eaa1e9ca35428ca08ed71ca75bb, type: 3}
       propertyPath: m_StaticEditorFlags
@@ -31157,6 +31173,10 @@ PrefabInstance:
       propertyPath: latheId
       value: 9
       objectReference: {fileID: 0}
+    - target: {fileID: 6510231186008781763, guid: ba3e4eaa1e9ca35428ca08ed71ca75bb, type: 3}
+      propertyPath: machineId
+      value: LATHE-09
+      objectReference: {fileID: 0}
     - target: {fileID: 6665267510324699942, guid: ba3e4eaa1e9ca35428ca08ed71ca75bb, type: 3}
       propertyPath: m_StaticEditorFlags
       value: 0
@@ -31601,6 +31621,10 @@ PrefabInstance:
     - target: {fileID: 6510231186008781763, guid: ba3e4eaa1e9ca35428ca08ed71ca75bb, type: 3}
       propertyPath: latheId
       value: 18
+      objectReference: {fileID: 0}
+    - target: {fileID: 6510231186008781763, guid: ba3e4eaa1e9ca35428ca08ed71ca75bb, type: 3}
+      propertyPath: machineId
+      value: LATHE-18
       objectReference: {fileID: 0}
     - target: {fileID: 6665267510324699942, guid: ba3e4eaa1e9ca35428ca08ed71ca75bb, type: 3}
       propertyPath: m_StaticEditorFlags
@@ -47703,6 +47727,10 @@ PrefabInstance:
       propertyPath: latheId
       value: 11
       objectReference: {fileID: 0}
+    - target: {fileID: 6510231186008781763, guid: ba3e4eaa1e9ca35428ca08ed71ca75bb, type: 3}
+      propertyPath: machineId
+      value: LATHE-11
+      objectReference: {fileID: 0}
     - target: {fileID: 6665267510324699942, guid: ba3e4eaa1e9ca35428ca08ed71ca75bb, type: 3}
       propertyPath: m_StaticEditorFlags
       value: 0
@@ -52023,6 +52051,10 @@ PrefabInstance:
     - target: {fileID: 6510231186008781763, guid: ba3e4eaa1e9ca35428ca08ed71ca75bb, type: 3}
       propertyPath: latheId
       value: 19
+      objectReference: {fileID: 0}
+    - target: {fileID: 6510231186008781763, guid: ba3e4eaa1e9ca35428ca08ed71ca75bb, type: 3}
+      propertyPath: machineId
+      value: LATHE-19
       objectReference: {fileID: 0}
     - target: {fileID: 6665267510324699942, guid: ba3e4eaa1e9ca35428ca08ed71ca75bb, type: 3}
       propertyPath: m_StaticEditorFlags
@@ -60948,6 +60980,10 @@ PrefabInstance:
     - target: {fileID: 6510231186008781763, guid: ba3e4eaa1e9ca35428ca08ed71ca75bb, type: 3}
       propertyPath: latheId
       value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 6510231186008781763, guid: ba3e4eaa1e9ca35428ca08ed71ca75bb, type: 3}
+      propertyPath: machineId
+      value: LATHE-10
       objectReference: {fileID: 0}
     - target: {fileID: 6665267510324699942, guid: ba3e4eaa1e9ca35428ca08ed71ca75bb, type: 3}
       propertyPath: m_StaticEditorFlags
@@ -79107,6 +79143,10 @@ PrefabInstance:
       propertyPath: latheId
       value: 17
       objectReference: {fileID: 0}
+    - target: {fileID: 6510231186008781763, guid: ba3e4eaa1e9ca35428ca08ed71ca75bb, type: 3}
+      propertyPath: machineId
+      value: LATHE-17
+      objectReference: {fileID: 0}
     - target: {fileID: 6665267510324699942, guid: ba3e4eaa1e9ca35428ca08ed71ca75bb, type: 3}
       propertyPath: m_StaticEditorFlags
       value: 0
@@ -81539,6 +81579,10 @@ PrefabInstance:
     - target: {fileID: 6510231186008781763, guid: ba3e4eaa1e9ca35428ca08ed71ca75bb, type: 3}
       propertyPath: latheId
       value: 6
+      objectReference: {fileID: 0}
+    - target: {fileID: 6510231186008781763, guid: ba3e4eaa1e9ca35428ca08ed71ca75bb, type: 3}
+      propertyPath: machineId
+      value: LATHE-06
       objectReference: {fileID: 0}
     - target: {fileID: 6665267510324699942, guid: ba3e4eaa1e9ca35428ca08ed71ca75bb, type: 3}
       propertyPath: m_StaticEditorFlags
@@ -110331,6 +110375,10 @@ PrefabInstance:
       propertyPath: latheId
       value: 15
       objectReference: {fileID: 0}
+    - target: {fileID: 6510231186008781763, guid: ba3e4eaa1e9ca35428ca08ed71ca75bb, type: 3}
+      propertyPath: machineId
+      value: LATHE-15
+      objectReference: {fileID: 0}
     - target: {fileID: 6665267510324699942, guid: ba3e4eaa1e9ca35428ca08ed71ca75bb, type: 3}
       propertyPath: m_StaticEditorFlags
       value: 0
@@ -128531,6 +128579,10 @@ PrefabInstance:
       propertyPath: latheId
       value: 8
       objectReference: {fileID: 0}
+    - target: {fileID: 6510231186008781763, guid: ba3e4eaa1e9ca35428ca08ed71ca75bb, type: 3}
+      propertyPath: machineId
+      value: LATHE-08
+      objectReference: {fileID: 0}
     - target: {fileID: 6665267510324699942, guid: ba3e4eaa1e9ca35428ca08ed71ca75bb, type: 3}
       propertyPath: m_StaticEditorFlags
       value: 0
@@ -130245,6 +130297,10 @@ PrefabInstance:
     - target: {fileID: 6510231186008781763, guid: ba3e4eaa1e9ca35428ca08ed71ca75bb, type: 3}
       propertyPath: latheId
       value: 13
+      objectReference: {fileID: 0}
+    - target: {fileID: 6510231186008781763, guid: ba3e4eaa1e9ca35428ca08ed71ca75bb, type: 3}
+      propertyPath: machineId
+      value: LATHE-13
       objectReference: {fileID: 0}
     - target: {fileID: 6665267510324699942, guid: ba3e4eaa1e9ca35428ca08ed71ca75bb, type: 3}
       propertyPath: m_StaticEditorFlags
@@ -132204,6 +132260,10 @@ PrefabInstance:
     - target: {fileID: 6510231186008781763, guid: ba3e4eaa1e9ca35428ca08ed71ca75bb, type: 3}
       propertyPath: latheId
       value: 20
+      objectReference: {fileID: 0}
+    - target: {fileID: 6510231186008781763, guid: ba3e4eaa1e9ca35428ca08ed71ca75bb, type: 3}
+      propertyPath: machineId
+      value: LATHE-20
       objectReference: {fileID: 0}
     - target: {fileID: 6665267510324699942, guid: ba3e4eaa1e9ca35428ca08ed71ca75bb, type: 3}
       propertyPath: m_StaticEditorFlags
@@ -139202,6 +139262,10 @@ PrefabInstance:
       propertyPath: latheId
       value: 2
       objectReference: {fileID: 0}
+    - target: {fileID: 6510231186008781763, guid: ba3e4eaa1e9ca35428ca08ed71ca75bb, type: 3}
+      propertyPath: machineId
+      value: LATHE-02
+      objectReference: {fileID: 0}
     - target: {fileID: 6665267510324699942, guid: ba3e4eaa1e9ca35428ca08ed71ca75bb, type: 3}
       propertyPath: m_StaticEditorFlags
       value: 0
@@ -141305,6 +141369,10 @@ PrefabInstance:
     - target: {fileID: 6510231186008781763, guid: ba3e4eaa1e9ca35428ca08ed71ca75bb, type: 3}
       propertyPath: latheId
       value: 16
+      objectReference: {fileID: 0}
+    - target: {fileID: 6510231186008781763, guid: ba3e4eaa1e9ca35428ca08ed71ca75bb, type: 3}
+      propertyPath: machineId
+      value: LATHE-16
       objectReference: {fileID: 0}
     - target: {fileID: 6665267510324699942, guid: ba3e4eaa1e9ca35428ca08ed71ca75bb, type: 3}
       propertyPath: m_StaticEditorFlags
@@ -150642,6 +150710,10 @@ PrefabInstance:
     - target: {fileID: 6510231186008781763, guid: ba3e4eaa1e9ca35428ca08ed71ca75bb, type: 3}
       propertyPath: latheId
       value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 6510231186008781763, guid: ba3e4eaa1e9ca35428ca08ed71ca75bb, type: 3}
+      propertyPath: machineId
+      value: LATHE-03
       objectReference: {fileID: 0}
     - target: {fileID: 6665267510324699942, guid: ba3e4eaa1e9ca35428ca08ed71ca75bb, type: 3}
       propertyPath: m_StaticEditorFlags
@@ -183457,6 +183529,10 @@ PrefabInstance:
     - target: {fileID: 6315803245078472248, guid: ba3e4eaa1e9ca35428ca08ed71ca75bb, type: 3}
       propertyPath: m_StaticEditorFlags
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6510231186008781763, guid: ba3e4eaa1e9ca35428ca08ed71ca75bb, type: 3}
+      propertyPath: machineId
+      value: LATHE-01
       objectReference: {fileID: 0}
     - target: {fileID: 6665267510324699942, guid: ba3e4eaa1e9ca35428ca08ed71ca75bb, type: 3}
       propertyPath: m_StaticEditorFlags
